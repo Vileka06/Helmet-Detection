@@ -2,7 +2,6 @@ import os
 import tempfile
 from pathlib import Path
 
-import av
 import cv2
 import numpy as np
 import streamlit as st
@@ -256,6 +255,7 @@ with tab_cam:
     st.write("Allow camera access in your browser to analyze the live feed.")
     st.info("Live camera requires browser camera permission and an HTTPS deployment or localhost.")
     try:
+        import av
         from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, WebRtcMode
         class HelmetCameraProcessor(VideoProcessorBase):
             def __init__(self):
