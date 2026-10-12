@@ -271,23 +271,33 @@ with tab_cam:
                     # views often contain only a head/shoulders and fail that filter.
                     # Use a more sensitive threshold for webcam frames, where objects
                     # are often smaller or less clear than uploaded images.
-                    camera_confidence = min(self.threshold, 0.10)
+                    camera_confidence = 0.01
                     result = model.predict(
-                        image, conf=camera_confidence, imgsz=self.size, verbose=False
+                        image, conf=camera_confidence, imgsz=max(960, self.size),
+                        max_det=50, verbose=False
                     )[0]
+                    raw_count = len(result.boxes)
+                    best_score = 0.0
+                    raw_labels = []
                     for box in result.boxes:
                         cls_id = int(box.cls[0].item())
                         score = float(box.conf[0].item())
-                        # This project model uses class 0 = With Helmet, class 1 = Without Helmet.
+                        best_score = max(best_score, score)
                         label = {0: "With Helmet", 1: "Without Helmet"}.get(
                             cls_id, str(result.names.get(cls_id, cls_id)).replace("_", " ")
                         )
+                        raw_labels.append(label)
                         x1, y1, x2, y2 = map(int, box.xyxy[0].cpu().numpy().tolist())
                         draw_box(annotated, x1, y1, x2, y2, label, score)
                         found += 1
+                    # Diagnostic overlay lets us distinguish model output from a camera issue.
+                    status = f"Model boxes: {raw_count} | max confidence: {best_score:.2f}"
+                    cv2.rectangle(annotated, (0, 0), (annotated.shape[1], 42), (35, 55, 72), -1)
+                    cv2.putText(annotated, status, (12, 28), cv2.FONT_HERSHEY_SIMPLEX,
+                        0.65, (255, 255, 255), 2, cv2.LINE_AA)
                     if found == 0:
-                        cv2.putText(annotated, "No helmet detections in this frame",
-                            (16, 34), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
+                        cv2.putText(annotated, "Model returned no boxes - test with a traffic image",
+                            (16, 72), cv2.FONT_HERSHEY_SIMPLEX, 0.62,
                             (255, 255, 255), 2, cv2.LINE_AA)
                 except Exception as exc:
                     message = f"Detection error: {str(exc)[:90]}"
