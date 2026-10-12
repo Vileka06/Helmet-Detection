@@ -269,15 +269,19 @@ with tab_cam:
                     # Run the trained helmet detector directly on each camera frame.
                     # Avoid the extra person-detector filter here because close-up webcam
                     # views often contain only a head/shoulders and fail that filter.
+                    # Use a more sensitive threshold for webcam frames, where objects
+                    # are often smaller or less clear than uploaded images.
+                    camera_confidence = min(self.threshold, 0.10)
                     result = model.predict(
-                        image, conf=self.threshold, imgsz=self.size, verbose=False
+                        image, conf=camera_confidence, imgsz=self.size, verbose=False
                     )[0]
                     for box in result.boxes:
                         cls_id = int(box.cls[0].item())
                         score = float(box.conf[0].item())
-                        label = str(result.names.get(cls_id, cls_id)).replace("_", " ")
-                        if label.lower() not in ("with helmet", "without helmet"):
-                            continue
+                        # This project model uses class 0 = With Helmet, class 1 = Without Helmet.
+                        label = {0: "With Helmet", 1: "Without Helmet"}.get(
+                            cls_id, str(result.names.get(cls_id, cls_id)).replace("_", " ")
+                        )
                         x1, y1, x2, y2 = map(int, box.xyxy[0].cpu().numpy().tolist())
                         draw_box(annotated, x1, y1, x2, y2, label, score)
                         found += 1
