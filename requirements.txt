@@ -1,0 +1,6 @@
+streamlit>=1.36,<2
+ultralytics-opencv-headless>=8.3,<9
+Pillow>=10.0
+numpy>=1.26
+streamlit-webrtc>=0.47.9
+av>=12.0.0
