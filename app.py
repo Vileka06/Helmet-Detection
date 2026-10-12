@@ -291,9 +291,18 @@ with tab_cam:
                     cv2.putText(annotated, message, (10, 30),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 1, cv2.LINE_AA)
                 return av.VideoFrame.from_ndarray(annotated, format="bgr24")
-        webrtc_streamer(key="helmetai-live-camera", mode=WebRtcMode.SENDRECV,
+        webrtc_streamer(
+            key="helmetai-live-camera",
+            mode=WebRtcMode.SENDRECV,
             video_processor_factory=HelmetCameraProcessor,
-            media_stream_constraints={"video":True,"audio":False}, async_processing=True)
+            media_stream_constraints={"video": True, "audio": False},
+            rtc_configuration={
+                "iceServers": [
+                    {"urls": ["stun:stun.l.google.com:19302"]}
+                ]
+            },
+            async_processing=True,
+        )
     except ImportError:
         st.error("Live camera packages are missing. Install streamlit-webrtc and av.")
 
