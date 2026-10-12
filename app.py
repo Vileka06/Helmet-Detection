@@ -263,10 +263,33 @@ with tab_cam:
                 self.size = image_size
             def recv(self, frame):
                 image = frame.to_ndarray(format="bgr24")
+                annotated = image.copy()
+                found = 0
                 try:
-                    annotated, counts = run_detection(image)
-                except Exception:
-                    annotated = image
+                    # Run the trained helmet detector directly on each camera frame.
+                    # Avoid the extra person-detector filter here because close-up webcam
+                    # views often contain only a head/shoulders and fail that filter.
+                    result = model.predict(
+                        image, conf=self.threshold, imgsz=self.size, verbose=False
+                    )[0]
+                    for box in result.boxes:
+                        cls_id = int(box.cls[0].item())
+                        score = float(box.conf[0].item())
+                        label = str(result.names.get(cls_id, cls_id)).replace("_", " ")
+                        if label.lower() not in ("with helmet", "without helmet"):
+                            continue
+                        x1, y1, x2, y2 = map(int, box.xyxy[0].cpu().numpy().tolist())
+                        draw_box(annotated, x1, y1, x2, y2, label, score)
+                        found += 1
+                    if found == 0:
+                        cv2.putText(annotated, "No helmet detections in this frame",
+                            (16, 34), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
+                            (255, 255, 255), 2, cv2.LINE_AA)
+                except Exception as exc:
+                    message = f"Detection error: {str(exc)[:90]}"
+                    cv2.rectangle(annotated, (0, 0), (annotated.shape[1], 48), (0, 0, 180), -1)
+                    cv2.putText(annotated, message, (10, 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 1, cv2.LINE_AA)
                 return av.VideoFrame.from_ndarray(annotated, format="bgr24")
         webrtc_streamer(key="helmetai-live-camera", mode=WebRtcMode.SENDRECV,
             video_processor_factory=HelmetCameraProcessor,
