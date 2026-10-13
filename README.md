@@ -1,86 +1,125 @@
 # 🪖 HelmetAI — Helmet Detection & Road Safety Analytics
 
-A computer-vision web application that analyzes traffic images and videos to identify **riders with helmets** and **riders without helmets**. Built with Python, Ultralytics YOLO, OpenCV, and Streamlit.
+HelmetAI is a computer-vision web application built to explore helmet detection in traffic scenes. It uses a trained YOLO model to predict **With Helmet** and **Without Helmet**, then draws bounding boxes and confidence scores over images or video frames.
 
 <p align="center">
-  <a href="https://helmet-detection-vileka-ai.streamlit.app/"><strong>🚀 Try the Live Demo</strong></a>
-  &nbsp; • &nbsp;
-  <a href="https://github.com/Vileka06/Helmet-Detection"><strong>💻 View Source Code</strong></a>
+  <a href="https://helmet-detection-vileka-ai.streamlit.app/"><strong>🚀 Open the Live Demo</strong></a>
+  &nbsp; · &nbsp;
+  <a href="https://github.com/Vileka06/Helmet-Detection"><strong>Browse the Code</strong></a>
 </p>
 
-> **Project status:** Deployed Streamlit application. Detection quality depends on the trained model, image quality, lighting, camera angle, and object size. Live-camera behavior may vary by browser and network.
+---
 
-## ✨ Features
+## 👀 See the app in action
 
-- **Image detection:** Upload a JPG, JPEG, PNG, or WEBP image and view the annotated result.
-- **Video detection:** Upload a supported video and export an annotated MP4.
-- **Live camera:** Use your browser camera for live detection where WebRTC connectivity is available.
-- **Detection counts:** View counts for “With Helmet” and “Without Helmet” detections.
-- **Adjustable inference:** Change the confidence threshold and image size from the sidebar.
-- **Download results:** Save annotated images and processed videos.
-- **Detection visualization:** Display bounding boxes and confidence scores on detected objects.
+The screenshots below show the application's interface and examples of model output. They are examples of the current application, not a guarantee that every prediction is correct.
 
-## 🖥️ Live Demo
+### 1. Home screen
 
-**[Open HelmetAI](https://helmet-detection-vileka-ai.streamlit.app/)**
+This is the main page. The sidebar contains the detection settings, and the tabs let you choose the type of input.
 
-1. Open the app.
-2. Choose **Upload Image**, **Upload Video**, or **Live Camera**.
-3. Upload a supported file or grant camera permission.
-4. Review the annotated output and detection counts.
-5. Download the result when the download option is available.
+![HelmetAI homepage](screenshots/homepage.png)
 
-For the most reliable first test, start with a clear traffic image containing visible motorcycle riders.
+### 2. Detect helmets in an image
 
-## 🧠 Model
+Choose **Upload Image**, select a traffic image, and click **Detect helmets in image**. The app shows the original image next to the annotated image. Colored boxes identify the model's predicted classes, and the metric cards count the predictions by class. Use **Download annotated image** to save the output.
 
-The application loads its trained Ultralytics model from:
+![Helmet detection on an uploaded image](screenshots/image-detection.png)
 
-```text
-models/best.pt
-```
+### 3. Live camera
 
-The app is configured to recognize these labels:
+Open **Live Camera**, allow camera permission in the browser, and start the stream. The app runs the detector on camera frames and draws predictions on the video. Live processing also depends on your browser, network, and WebRTC connection.
 
-| Class ID | Label |
+![Live camera detection example](screenshots/live-detection.png)
+
+### 4. Video detection
+
+Choose **Upload Video**, select a supported video file, set the maximum duration and frame sampling rate, then click **Process video**. The app processes selected frames, builds an annotated MP4, displays the result, and provides a download when processing completes.
+
+![HelmetAI video detection example](screenshots/videodetection.png)
+
+---
+
+## ✅ What the application can do
+
+- **Image detection:** process JPG, JPEG, PNG, and WEBP images.
+- **Video detection:** analyze sampled video frames and create an annotated MP4.
+- **Live camera:** run predictions on browser camera frames when the WebRTC connection works.
+- **Detection controls:** adjust the confidence threshold and inference image size.
+- **Visual output:** show bounding boxes, class labels, confidence scores, and per-class counts.
+- **Download results:** save annotated images or processed videos.
+
+## 🧭 Try the live demo
+
+**[Launch HelmetAI](https://helmet-detection-vileka-ai.streamlit.app/)**
+
+For the easiest first test:
+
+1. Open the app and select **Upload Image**.
+2. Choose a clear traffic photo that contains one or more motorcycle riders.
+3. Click **Detect helmets in image**.
+4. Compare **Original image** with **Detection result**.
+5. Check the “With helmet” and “Without helmet” counts.
+6. Click **Download annotated image** to save the result.
+
+To try video, open **Upload Video** and process a short clip first. For live camera, use **Live Camera** and allow the browser to access your camera.
+
+## 🧠 How detection works
+
+1. **Input:** the app receives an uploaded image, video frame, or live camera frame.
+2. **Inference:** the trained YOLO model predicts bounding boxes, class IDs, and confidence scores.
+3. **Filtering:** the app applies the configured confidence threshold and overlap suppression to reduce duplicate predictions.
+4. **Annotation:** OpenCV draws the boxes and labels on the image or frame.
+5. **Results:** the app displays the annotated output, counts, and download option where applicable.
+
+The application loads its trained weights from `models/best.pt`.
+
+| Class ID | Label displayed |
 | --- | --- |
 | 0 | With Helmet |
 | 1 | Without Helmet |
 
-The confidence threshold and inference image size can affect the number of detections. A low threshold can increase detections but may also increase false positives.
+A confidence score is the model's confidence in a prediction, not a guarantee that the prediction is correct.
 
-**Important:** This repository does not claim a particular accuracy, precision, recall, or mAP score. Add measured evaluation results only after testing the model on a separate labelled test set.
+## 🖥️ Interface controls
 
-## 🧰 Tech Stack
-
-| Technology | Purpose |
+| Control | What it changes |
 | --- | --- |
-| Python | Application logic |
-| Ultralytics YOLO | Object-detection inference |
-| OpenCV | Image/video processing and bounding-box drawing |
-| NumPy | Frame and image array handling |
-| Pillow | Image loading |
-| Streamlit | Interactive web interface |
-| Streamlit WebRTC + PyAV | Browser live-camera streaming |
-| Streamlit Community Cloud | Web deployment |
+| Confidence threshold | Higher values usually show fewer, stronger predictions; lower values may show more false positives. |
+| Inference image size | Larger sizes can help with small objects but may take longer. |
+| Analyze every Nth frame | In video mode, controls how often frames are sent to the detector. |
+| Maximum video duration | Limits how much of the uploaded video is processed. |
 
-## 📁 Project Structure
+## 🛠️ Technology used
+
+| Technology | Role in the project |
+| --- | --- |
+| Python | Main application logic |
+| Ultralytics YOLO | Object-detection model inference |
+| OpenCV | Frame processing, box drawing, video input/output |
+| NumPy | Image and frame arrays |
+| Pillow | Image loading |
+| Streamlit | Web interface |
+| Streamlit WebRTC and PyAV | Browser camera streaming |
+| Streamlit Community Cloud | Hosted live demo |
+
+## 📁 Repository structure
 
 ```text
 Helmet-Detection/
-├── app.py                 # Streamlit interface and detection pipeline
-├── predict.py             # Prediction utility
-├── test_model.py          # Model testing utility
-├── requirements.txt       # Python dependencies
-├── README.md              # Project documentation
-└── models/
-    ├── best.pt            # Trained model weights
-    └── README.md          # Model file notes
+├── app.py
+├── requirements.txt
+├── README.md
+├── models/
+│   └── best.pt
+└── screenshots/
+    ├── homepage.png
+    ├── image-detection.png
+    ├── live-detection.png
+    └── videodetection.png
 ```
 
-Some files or folders may differ if the repository is updated.
-
-## ⚙️ Run Locally
+## 💻 Run it locally
 
 ### 1. Clone the repository
 
@@ -89,7 +128,7 @@ git clone https://github.com/Vileka06/Helmet-Detection.git
 cd Helmet-Detection
 ```
 
-### 2. Create a virtual environment
+### 2. Create and activate a virtual environment
 
 **macOS / Linux**
 
@@ -105,63 +144,56 @@ python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-### 3. Install dependencies
+### 3. Install the dependencies
 
 ```bash
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-### 4. Check the model file
+### 4. Confirm the trained model is present
 
-Make sure the trained weights exist at `models/best.pt`. The filename and folder path must match exactly.
+Make sure `models/best.pt` exists. The app expects that exact path and filename.
 
-### 5. Start the app
+### 5. Run the application
 
 ```bash
 python -m streamlit run app.py
 ```
 
-Streamlit will print a local URL, usually `http://localhost:8501`, that you can open in your browser.
+Open the local URL printed in the terminal, normally `http://localhost:8501`.
 
 ## ☁️ Deployment
 
-This project is configured for **Streamlit Community Cloud**.
+The project is hosted on Streamlit Community Cloud.
 
-1. Sign in to [Streamlit Community Cloud](https://share.streamlit.io/).
-2. Create an app and connect the `Vileka06/Helmet-Detection` GitHub repository.
-3. Select the `main` branch and `app.py` as the app entry point.
-4. Deploy and check the build logs if startup fails.
+- **Live application:** [helmet-detection-vileka-ai.streamlit.app](https://helmet-detection-vileka-ai.streamlit.app/)
+- **Repository:** [Vileka06/Helmet-Detection](https://github.com/Vileka06/Helmet-Detection)
+- **Entry point:** `app.py`
+- **Dependencies:** `requirements.txt`
 
-The live-camera tab needs browser camera permission and a working WebRTC connection. A visible camera preview does not by itself guarantee that frames are reaching the server-side model for inference.
+The live-camera feature requires browser camera permission and a working WebRTC connection. A camera preview alone does not guarantee that frames have reached the model for inference.
 
-## 🧪 Testing and Evaluation
+## ⚠️ Known limitations
 
-To evaluate a model fairly, test it on images that were not used for training. Useful object-detection metrics include:
+This is an educational computer-vision project, and predictions can be wrong. Small or distant riders, blur, occlusion, lighting, camera angle, and crowded scenes can affect results. A model may also produce false positives—for example, interpreting a person's face or clothing as a helmet. Review the annotated output instead of treating each prediction as ground truth.
 
-- **Precision:** How many predicted detections are correct.
-- **Recall:** How many labelled objects the model finds.
-- **mAP:** A standard object-detection evaluation metric.
-- **Confusion analysis:** Review false positives and missed detections for each class.
+The screenshots are example outputs, not a formal benchmark. No accuracy, precision, recall, or mAP figure is claimed here. Those metrics should be added only after running a documented evaluation on a separate labelled test set.
 
-Keep the test dataset separate from the training data and report the actual results produced by your evaluation pipeline.
+## 🔭 Next improvements
 
-## ⚠️ Limitations
+- Evaluate the model on a separate labelled test set and publish measured metrics.
+- Review false positives and missed detections, then improve the training data.
+- Add automated tests for model loading and sample-image inference.
+- Improve live-camera connection diagnostics and performance.
 
-- Small, distant, blurred, or partly hidden riders can be difficult to detect.
-- Lighting, camera angle, image resolution, and crowded scenes may affect predictions.
-- Low confidence thresholds can produce false positives.
-- Video processing can take time, particularly for long or high-resolution videos.
-- Live-camera inference depends on browser permissions and WebRTC/network connectivity.
-- This is an educational computer-vision project and should not be treated as the sole basis for road-safety enforcement decisions.
+## 👩‍💻 Author
 
-## 🔭 Possible Improvements
+**Vileka V** · Computer Science and Engineering
 
-- Add a sample gallery with verified before-and-after detection results.
-- Publish a reproducible evaluation report with precision, recall, and mAP.
-- Improve detection on small and distant riders through dataset review and training.
-- Add automated tests for model loading and image inference.
-- Add clearer live-camera connection diagnostics and deployment checks.
+- GitHub: [@Vileka06](https://github.com/Vileka06)
+- Live demo: [HelmetAI](https://helmet-detection-vileka-ai.streamlit.app/)
 
+---
 
-If you find this project useful, consider giving the repository a ⭐ on GitHub.
+⭐ If this project helps you understand object detection, consider starring the repository.
