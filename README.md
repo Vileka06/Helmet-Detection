@@ -163,14 +163,5 @@ Keep the test dataset separate from the training data and report the actual resu
 - Add automated tests for model loading and image inference.
 - Add clearer live-camera connection diagnostics and deployment checks.
 
-## 👩‍💻 Author
-
-**Vileka V** — Computer Science and Engineering student interested in Python, machine learning, and computer vision.
-
-- GitHub: [@Vileka06](https://github.com/Vileka06)
-- Project repository: [Helmet-Detection](https://github.com/Vileka06/Helmet-Detection)
-- Live app: [HelmetAI on Streamlit](https://helmet-detection-vileka-ai.streamlit.app/)
-
----
 
 If you find this project useful, consider giving the repository a ⭐ on GitHub.
