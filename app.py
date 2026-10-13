@@ -269,16 +269,15 @@ with tab_cam:
                     # Run the trained helmet detector directly on each camera frame.
                     # Avoid the extra person-detector filter here because close-up webcam
                     # views often contain only a head/shoulders and fail that filter.
-                    # Use a more sensitive threshold for webcam frames, where objects
-                    # are often smaller or less clear than uploaded images.
-                    camera_confidence = 0.01
+                    # Reject very weak predictions in live camera frames. A low threshold
+                    # caused many false positives on faces and clothing.
+                    camera_confidence = 0.45
                     result = model.predict(
-                        image, conf=camera_confidence, imgsz=max(960, self.size),
-                        max_det=50, verbose=False
+                        image, conf=camera_confidence, iou=0.45,
+                        imgsz=max(640, self.size), max_det=20, verbose=False
                     )[0]
                     raw_count = len(result.boxes)
                     best_score = 0.0
-                    raw_labels = []
                     for box in result.boxes:
                         cls_id = int(box.cls[0].item())
                         score = float(box.conf[0].item())
@@ -286,17 +285,16 @@ with tab_cam:
                         label = {0: "With Helmet", 1: "Without Helmet"}.get(
                             cls_id, str(result.names.get(cls_id, cls_id)).replace("_", " ")
                         )
-                        raw_labels.append(label)
                         x1, y1, x2, y2 = map(int, box.xyxy[0].cpu().numpy().tolist())
                         draw_box(annotated, x1, y1, x2, y2, label, score)
                         found += 1
                     # Diagnostic overlay lets us distinguish model output from a camera issue.
-                    status = f"Model boxes: {raw_count} | max confidence: {best_score:.2f}"
+                    status = f"Detections: {raw_count} | max confidence: {best_score:.2f} | threshold: {camera_confidence:.2f}"
                     cv2.rectangle(annotated, (0, 0), (annotated.shape[1], 42), (35, 55, 72), -1)
                     cv2.putText(annotated, status, (12, 28), cv2.FONT_HERSHEY_SIMPLEX,
                         0.65, (255, 255, 255), 2, cv2.LINE_AA)
                     if found == 0:
-                        cv2.putText(annotated, "Model returned no boxes - test with a traffic image",
+                        cv2.putText(annotated, "No confident helmet detections in this frame",
                             (16, 72), cv2.FONT_HERSHEY_SIMPLEX, 0.62,
                             (255, 255, 255), 2, cv2.LINE_AA)
                 except Exception as exc:
