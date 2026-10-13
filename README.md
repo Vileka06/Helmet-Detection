@@ -168,7 +168,6 @@ Open the local URL printed in the terminal, normally `http://localhost:8501`.
 The project is hosted on Streamlit Community Cloud.
 
 - **Live application:** [helmet-detection-vileka-ai.streamlit.app](https://helmet-detection-vileka-ai.streamlit.app/)
-- **Repository:** [Vileka06/Helmet-Detection](https://github.com/Vileka06/Helmet-Detection)
 - **Entry point:** `app.py`
 - **Dependencies:** `requirements.txt`
 
@@ -187,13 +186,5 @@ The screenshots are example outputs, not a formal benchmark. No accuracy, precis
 - Add automated tests for model loading and sample-image inference.
 - Improve live-camera connection diagnostics and performance.
 
-## 👩‍💻 Author
-
-**Vileka V** · Computer Science and Engineering
-
-- GitHub: [@Vileka06](https://github.com/Vileka06)
-- Live demo: [HelmetAI](https://helmet-detection-vileka-ai.streamlit.app/)
-
----
 
 ⭐ If this project helps you understand object detection, consider starring the repository.
